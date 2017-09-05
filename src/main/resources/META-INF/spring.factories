@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.mcp.fastcloud.util.processor.CloudBeanProcessor,\
+com.mcp.fastcloud.util.processor.LogBeanPostProcessor
