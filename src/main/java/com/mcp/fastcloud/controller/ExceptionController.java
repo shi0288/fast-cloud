@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
 
 /**
  * Created by shiqm on 2017/3/23.
@@ -32,21 +33,21 @@ public class ExceptionController {
             BaseException baseException = (BaseException) ex;
             switch (baseException.getLevel()) {
                 case INFO:
-                    logger.info(baseException.getResultCode().toString());
+                    logger.info(baseException.getCode().toString());
                     break;
                 case WARN:
-                    logger.warn(baseException.getResultCode().toString());
+                    logger.warn(baseException.getCode().toString());
                     break;
                 case DEBUG:
-                    logger.debug(baseException.getResultCode().toString());
+                    logger.debug(baseException.getCode().toString());
                     break;
                 case ERROR:
-                    logger.error(baseException.getResultCode().toString());
+                    logger.error(baseException.getCode().toString());
                     break;
                 default:
-                    logger.error(baseException.getResultCode().toString());
+                    logger.error(baseException.getCode().toString());
             }
-            result = new Result(baseException.getResultCode());
+            result = new Result(baseException.getCode());
         }
         else {
             if (ex.getClass().isAssignableFrom(MissingServletRequestParameterException.class)) {
@@ -59,6 +60,10 @@ public class ExceptionController {
             }
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    public interface ExceptionFilter {
+        boolean matches(Exception ex);
     }
 
 

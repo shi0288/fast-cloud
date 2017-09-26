@@ -1,6 +1,7 @@
 package com.mcp.fastcloud.util.exception.base;
 
 
+import com.mcp.fastcloud.util.Code;
 import com.mcp.fastcloud.util.enums.Level;
 import com.mcp.fastcloud.util.enums.ResultCode;
 
@@ -9,20 +10,19 @@ import com.mcp.fastcloud.util.enums.ResultCode;
  */
 public class BaseException extends RuntimeException {
 
-    protected ResultCode resultCode;
+    protected Code code;
     protected Level level = Level.ERROR;
 
-
-    public BaseException(ResultCode resultCode) {
-        this.resultCode = resultCode;
+    public BaseException(Code code) {
+        this.code = code;
     }
 
-    public ResultCode getResultCode() {
-        return resultCode;
+    public Code getCode() {
+        return code;
     }
 
-    public void setResultCode(ResultCode resultCode) {
-        this.resultCode = resultCode;
+    public void setCode(Code code) {
+        this.code = code;
     }
 
     public Level getLevel() {
