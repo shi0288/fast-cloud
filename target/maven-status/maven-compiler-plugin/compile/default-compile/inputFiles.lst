@@ -14,6 +14,7 @@
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/enums/ResultCode.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/SpringIocUtil.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/FastJsonDecoder.java
+/data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/annotation/ReturnDecoder.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudServiceFactory.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudProxy.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudProxyMethodFactory.java

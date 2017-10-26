@@ -1,5 +1,7 @@
 package com.mcp.fastcloud.proxy;
 
+import com.mcp.fastcloud.util.Result;
+import com.mcp.fastcloud.annotation.ReturnDecoder;
 import com.mcp.fastcloud.annotation.ServerName;
 import com.mcp.fastcloud.util.FastJsonDecoder;
 import com.mcp.fastcloud.util.SpringIocUtil;
@@ -7,6 +9,7 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import feign.Feign;
 import feign.RequestInterceptor;
+import feign.codec.Decoder;
 import feign.form.FormEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +39,23 @@ public class CloudProxy<T> implements InvocationHandler {
             applyClass = serverNameAnnotation.applyClass();
         }
         EurekaClient eurekaClient = (EurekaClient) SpringIocUtil.getBean("eurekaClient");
-        Feign.Builder builder = Feign.builder().encoder(new FormEncoder()).decoder(new FastJsonDecoder());
+        Feign.Builder builder;
+        ReturnDecoder returnDecoder = method.getAnnotation(ReturnDecoder.class);
+        if (returnDecoder != null) {
+            builder = Feign.builder().encoder(new FormEncoder()).decoder((Decoder)SpringIocUtil.getBean(returnDecoder.value()));
+        } else {
+            if (method.getReturnType().isAssignableFrom(Result.class)) {
+                builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+            } else {
+                builder = Feign.builder().encoder(new FormEncoder());
+            }
+        }
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
                 RequestInterceptor forwardedForInterceptor = (RequestInterceptor) SpringIocUtil.getBean(applyClass);
                 builder.requestInterceptor(forwardedForInterceptor);
             } catch (Exception e) {
-                logger.warn("获取请求拦截bean错误：" + applyClass);
+                logger.warn("获取请求拦截bean错误==>RequestInterceptor：" + applyClass);
             }
         }
         InstanceInfo instance = eurekaClient.getNextServerFromEureka(serverName, false);

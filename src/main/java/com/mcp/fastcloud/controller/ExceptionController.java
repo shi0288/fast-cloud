@@ -12,7 +12,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Field;
 
 /**
  * Created by shiqm on 2017/3/23.

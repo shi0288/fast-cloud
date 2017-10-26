@@ -1,5 +1,6 @@
 package com.mcp.fastcloud.util.processor;
 
+import com.mcp.fastcloud.util.FastJsonDecoder;
 import com.mcp.fastcloud.annotation.ServerName;
 import com.mcp.fastcloud.util.SpringIocUtil;
 import com.mcp.fastcloud.util.scanner.CloudPathScanner;
@@ -26,6 +27,11 @@ public class CloudBeanProcessor implements BeanDefinitionRegistryPostProcessor, 
     @Bean
     public SpringIocUtil initSpringIocUtil() {
         return new SpringIocUtil();
+    }
+
+    @Bean
+    public FastJsonDecoder initFastJsonDecoder() {
+        return new FastJsonDecoder();
     }
 
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {

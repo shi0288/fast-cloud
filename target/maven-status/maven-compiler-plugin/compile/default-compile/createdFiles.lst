@@ -2,6 +2,7 @@ com/mcp/fastcloud/annotation/ServerName.class
 com/mcp/fastcloud/util/exception/CloudClientException.class
 com/mcp/fastcloud/proxy/CloudServiceFactory.class
 com/mcp/fastcloud/util/exception/base/InfoException.class
+com/mcp/fastcloud/annotation/ReturnDecoder.class
 com/mcp/fastcloud/util/processor/LogBeanPostProcessor$2.class
 com/mcp/fastcloud/util/scanner/CloudPathScanner.class
 com/mcp/fastcloud/controller/ExceptionController$1.class
@@ -16,6 +17,7 @@ com/mcp/fastcloud/util/exception/base/DebugException.class
 com/mcp/fastcloud/controller/ExceptionController.class
 com/mcp/fastcloud/util/Code.class
 com/mcp/fastcloud/util/processor/LogBeanPostProcessor$1.class
+com/mcp/fastcloud/controller/ExceptionController$ExceptionFilter.class
 com/mcp/fastcloud/util/Result.class
 com/mcp/fastcloud/util/processor/LogBeanPostProcessor.class
 com/mcp/fastcloud/util/SpringIocUtil.class
