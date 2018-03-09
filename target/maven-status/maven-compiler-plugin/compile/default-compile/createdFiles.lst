@@ -13,6 +13,7 @@ com/mcp/fastcloud/util/enums/ResultCode.class
 com/mcp/fastcloud/util/processor/CloudBeanProcessor.class
 com/mcp/fastcloud/util/exception/base/ErrorException.class
 com/mcp/fastcloud/proxy/CloudProxy.class
+com/mcp/fastcloud/util/HttpClient4Utils.class
 com/mcp/fastcloud/util/exception/base/DebugException.class
 com/mcp/fastcloud/controller/ExceptionController.class
 com/mcp/fastcloud/util/Code.class
@@ -22,5 +23,6 @@ com/mcp/fastcloud/util/Result.class
 com/mcp/fastcloud/util/processor/LogBeanPostProcessor.class
 com/mcp/fastcloud/util/SpringIocUtil.class
 com/mcp/fastcloud/annotation/Log.class
+com/mcp/fastcloud/util/CloudSender.class
 com/mcp/fastcloud/proxy/CloudProxyMethodFactory.class
 com/mcp/fastcloud/util/exception/base/WarnException.class

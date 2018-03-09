@@ -1,8 +1,10 @@
 package com.mcp.fastcloud.proxy;
 
-import com.mcp.fastcloud.util.Result;
+import com.google.common.collect.Lists;
 import com.mcp.fastcloud.annotation.ReturnDecoder;
 import com.mcp.fastcloud.annotation.ServerName;
+import com.mcp.fastcloud.util.HttpClient4Utils;
+import com.mcp.fastcloud.util.Result;
 import com.mcp.fastcloud.util.FastJsonDecoder;
 import com.mcp.fastcloud.util.SpringIocUtil;
 import com.netflix.appinfo.InstanceInfo;
@@ -11,11 +13,18 @@ import feign.Feign;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.form.FormEncoder;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by shiqm on 2017-06-14.
@@ -42,14 +51,15 @@ public class CloudProxy<T> implements InvocationHandler {
         Feign.Builder builder;
         ReturnDecoder returnDecoder = method.getAnnotation(ReturnDecoder.class);
         if (returnDecoder != null) {
-            builder = Feign.builder().encoder(new FormEncoder()).decoder((Decoder)SpringIocUtil.getBean(returnDecoder.value()));
+            builder = Feign.builder().encoder(new FormEncoder()).decoder((Decoder) SpringIocUtil.getBean(returnDecoder.value()));
+        } else if (method.getReturnType().isAssignableFrom(Result.class)) {
+            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+        } else if (!method.getReturnType().isAssignableFrom(String.class)) {
+            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
         } else {
-            if (method.getReturnType().isAssignableFrom(Result.class)) {
-                builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
-            } else {
-                builder = Feign.builder().encoder(new FormEncoder());
-            }
+            builder = Feign.builder().encoder(new FormEncoder());
         }
+
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
                 RequestInterceptor forwardedForInterceptor = (RequestInterceptor) SpringIocUtil.getBean(applyClass);
@@ -58,8 +68,34 @@ public class CloudProxy<T> implements InvocationHandler {
                 logger.warn("获取请求拦截bean错误==>RequestInterceptor：" + applyClass);
             }
         }
-        InstanceInfo instance = eurekaClient.getNextServerFromEureka(serverName, false);
-        Object service = builder.target(method.getDeclaringClass(), instance.getHomePageUrl());
+
+        List<InstanceInfo> instanceInfoList = Lists.newCopyOnWriteArrayList(eurekaClient.getInstancesByVipAddress(serverName, false));
+        Collections.sort(instanceInfoList, (InstanceInfo ins1, InstanceInfo ins2) -> (new Random()).nextInt() % 2 == 0 ? 1 : -1);
+        InstanceInfo instanceCur = null;
+        for (InstanceInfo instance : instanceInfoList) {
+            CloseableHttpResponse response = null;
+            try {
+                HttpGet httpGet = new HttpGet(instance.getHealthCheckUrl());
+                response = (CloseableHttpResponse) HttpClient4Utils.httpClient.execute(httpGet);
+                int code = response.getStatusLine().getStatusCode();
+                if (code != HttpStatus.SC_OK) {
+                    continue;
+                }
+                instanceCur = instance;
+                break;
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                System.out.println(serverName + "服务不可用。。。。。。。。");
+            } finally {
+                if (response != null) {
+                    try {
+                        response.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+        Object service = builder.target(method.getDeclaringClass(), instanceCur.getHomePageUrl());
         return method.invoke(service, args);
 
     }

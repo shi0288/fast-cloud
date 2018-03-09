@@ -16,7 +16,9 @@
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/FastJsonDecoder.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/annotation/ReturnDecoder.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudServiceFactory.java
+/data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/HttpClient4Utils.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudProxy.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/proxy/CloudProxyMethodFactory.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/exception/base/WarnException.java
 /data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/exception/CloudClientException.java
+/data/workspace/util/fastcloud/src/main/java/com/mcp/fastcloud/util/CloudSender.java
