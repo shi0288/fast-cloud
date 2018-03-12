@@ -59,7 +59,6 @@ public class CloudProxy<T> implements InvocationHandler {
         } else {
             builder = Feign.builder().encoder(new FormEncoder());
         }
-
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
                 RequestInterceptor forwardedForInterceptor = (RequestInterceptor) SpringIocUtil.getBean(applyClass);
@@ -75,7 +74,7 @@ public class CloudProxy<T> implements InvocationHandler {
         for (InstanceInfo instance : instanceInfoList) {
             CloseableHttpResponse response = null;
             try {
-                HttpGet httpGet = new HttpGet(instance.getHealthCheckUrl());
+                HttpGet httpGet = new HttpGet(instance.getStatusPageUrl());
                 response = (CloseableHttpResponse) HttpClient4Utils.httpClient.execute(httpGet);
                 int code = response.getStatusLine().getStatusCode();
                 if (code != HttpStatus.SC_OK) {
