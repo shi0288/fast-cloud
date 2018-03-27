@@ -9,10 +9,11 @@ import com.mcp.fastcloud.util.FastJsonDecoder;
 import com.mcp.fastcloud.util.SpringIocUtil;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
-import feign.Feign;
-import feign.RequestInterceptor;
+import feign.*;
 import feign.codec.Decoder;
 import feign.form.FormEncoder;
+import feign.hystrix.FallbackFactory;
+import feign.hystrix.HystrixFeign;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +26,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import static com.mcp.fastcloud.util.enums.ResultCode.ERROR_CLOUD;
 
 /**
  * Created by shiqm on 2017-06-14.
@@ -48,17 +51,26 @@ public class CloudProxy<T> implements InvocationHandler {
             applyClass = serverNameAnnotation.applyClass();
         }
         EurekaClient eurekaClient = (EurekaClient) SpringIocUtil.getBean("eurekaClient");
-        Feign.Builder builder;
+        FallbackFactory<T> fallbackFactory = cause -> {
+            Result result = new Result(ERROR_CLOUD);
+            return (T) result;
+        };
+        HystrixFeign.Builder builder =
+                HystrixFeign.builder().errorDecoder((String methodKey, Response response) -> feign.FeignException.errorStatus(methodKey, response))
+                        .options(new Request.Options(200, 2000))
+                        .retryer(Retryer.NEVER_RETRY);
+
         ReturnDecoder returnDecoder = method.getAnnotation(ReturnDecoder.class);
         if (returnDecoder != null) {
-            builder = Feign.builder().encoder(new FormEncoder()).decoder((Decoder) SpringIocUtil.getBean(returnDecoder.value()));
+            builder.encoder(new FormEncoder()).decoder((Decoder) SpringIocUtil.getBean(returnDecoder.value()));
         } else if (method.getReturnType().isAssignableFrom(Result.class)) {
-            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+            builder.encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
         } else if (!method.getReturnType().isAssignableFrom(String.class)) {
-            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+            builder.encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
         } else {
-            builder = Feign.builder().encoder(new FormEncoder());
+            builder.encoder(new FormEncoder());
         }
+
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
                 RequestInterceptor forwardedForInterceptor = (RequestInterceptor) SpringIocUtil.getBean(applyClass);
@@ -75,7 +87,7 @@ public class CloudProxy<T> implements InvocationHandler {
             CloseableHttpResponse response = null;
             try {
                 HttpGet httpGet = new HttpGet(instance.getStatusPageUrl());
-                response = (CloseableHttpResponse) HttpClient4Utils.httpClient.execute(httpGet);
+                response = HttpClient4Utils.httpClient.execute(httpGet);
                 int code = response.getStatusLine().getStatusCode();
                 if (code != HttpStatus.SC_OK) {
                     continue;
@@ -84,7 +96,7 @@ public class CloudProxy<T> implements InvocationHandler {
                 break;
             } catch (IOException ex) {
                 ex.printStackTrace();
-                System.out.println(serverName + "服务不可用。。。。。。。。");
+                logger.warn(serverName + "服务不可用。。。。。。。。");
             } finally {
                 if (response != null) {
                     try {
@@ -94,7 +106,7 @@ public class CloudProxy<T> implements InvocationHandler {
                 }
             }
         }
-        Object service = builder.target(method.getDeclaringClass(), instanceCur.getHomePageUrl());
+        Object service = builder.target((Class<T>) method.getDeclaringClass(), instanceCur.getHomePageUrl(), fallbackFactory);
         return method.invoke(service, args);
 
     }
