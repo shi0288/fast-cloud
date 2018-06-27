@@ -7,6 +7,7 @@ import com.mcp.fastcloud.util.HttpClient4Utils;
 import com.mcp.fastcloud.util.Result;
 import com.mcp.fastcloud.util.FastJsonDecoder;
 import com.mcp.fastcloud.util.SpringIocUtil;
+import com.mcp.fastcloud.util.contract.PostElectiveContract;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import feign.Feign;
@@ -59,7 +60,6 @@ public class CloudProxy<T> implements InvocationHandler {
         } else {
             builder = Feign.builder().encoder(new FormEncoder());
         }
-
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
                 RequestInterceptor forwardedForInterceptor = (RequestInterceptor) SpringIocUtil.getBean(applyClass);
@@ -75,8 +75,8 @@ public class CloudProxy<T> implements InvocationHandler {
         for (InstanceInfo instance : instanceInfoList) {
             CloseableHttpResponse response = null;
             try {
-                HttpGet httpGet = new HttpGet(instance.getHealthCheckUrl());
-                response = (CloseableHttpResponse) HttpClient4Utils.httpClient.execute(httpGet);
+                HttpGet httpGet = new HttpGet(instance.getStatusPageUrl());
+                response = HttpClient4Utils.httpClient.execute(httpGet);
                 int code = response.getStatusLine().getStatusCode();
                 if (code != HttpStatus.SC_OK) {
                     continue;
@@ -85,7 +85,7 @@ public class CloudProxy<T> implements InvocationHandler {
                 break;
             } catch (IOException ex) {
                 ex.printStackTrace();
-                System.out.println(serverName + "服务不可用。。。。。。。。");
+                logger.error(serverName + "服务不可用。。。。。。。。");
             } finally {
                 if (response != null) {
                     try {
@@ -95,6 +95,7 @@ public class CloudProxy<T> implements InvocationHandler {
                 }
             }
         }
+        builder.contract(new PostElectiveContract());
         Object service = builder.target(method.getDeclaringClass(), instanceCur.getHomePageUrl());
         return method.invoke(service, args);
 

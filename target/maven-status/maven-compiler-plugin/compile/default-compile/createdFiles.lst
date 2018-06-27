@@ -8,6 +8,7 @@ com/mcp/fastcloud/util/scanner/CloudPathScanner.class
 com/mcp/fastcloud/controller/ExceptionController$1.class
 com/mcp/fastcloud/util/exception/base/BaseException.class
 com/mcp/fastcloud/util/FastJsonDecoder.class
+com/mcp/fastcloud/util/contract/PostElectiveContract.class
 com/mcp/fastcloud/util/enums/Level.class
 com/mcp/fastcloud/util/enums/ResultCode.class
 com/mcp/fastcloud/util/processor/CloudBeanProcessor.class
