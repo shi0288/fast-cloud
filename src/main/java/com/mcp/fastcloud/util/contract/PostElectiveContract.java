@@ -70,7 +70,7 @@ public class PostElectiveContract extends Contract.Default {
     @Override
     protected boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
         boolean isHttpAnnotation = false;
-        boolean isGetNoUrlParma = false;
+        boolean isGetNoUrlParam = false;
         String paramTag = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -100,7 +100,7 @@ public class PostElectiveContract extends Contract.Default {
                     if (data.template().method().equals("GET")) {
                         //GET其实可以自动给url增加参数，不用在url注明，可以优化
                         paramTag = name + "=" + varName;
-                        isGetNoUrlParma = true;
+                        isGetNoUrlParam = true;
                     }
                 }
             } else if (annotationType == QueryMap.class) {
@@ -115,7 +115,7 @@ public class PostElectiveContract extends Contract.Default {
             }
         }
         if (StringUtils.isNotEmpty(paramTag)) {
-            if (isGetNoUrlParma) {
+            if (isGetNoUrlParam) {
                 if (data.template().url().indexOf("?") == -1) {
                     data.template().append("?" + paramTag);
                 } else {

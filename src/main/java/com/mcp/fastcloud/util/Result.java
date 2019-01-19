@@ -9,14 +9,14 @@ import com.mcp.fastcloud.util.enums.ResultCode;
 public class Result {
 
     private int code;
-    private String msg;
+    private String message;
     private Object data;
 
     @Override
     public String toString() {
         return "Result{" +
                 "code=" + code +
-                ", msg='" + msg + '\'' +
+                ", message='" + message + '\'' +
                 ", data=" + data +
                 '}';
     }
@@ -28,11 +28,11 @@ public class Result {
 
     public Result(Code code) {
         this.code = code.getCode();
-        this.msg = code.getMsg();
+        this.message = code.getMessage();
     }
 
     public Result(String massage) {
-        this.msg = massage;
+        this.message = massage;
     }
 
     public Result(Object data) {
@@ -40,14 +40,14 @@ public class Result {
         this.data = data;
     }
 
-    public Result(int code, String msg) {
+    public Result(int code, String message) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
     }
 
-    public Result(int code, String msg, Object data) {
+    public Result(int code, String message, Object data) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
         this.data = data;
     }
 
@@ -59,12 +59,12 @@ public class Result {
         this.code = code;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Object getData() {

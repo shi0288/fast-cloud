@@ -52,24 +52,16 @@ public class CloudProxy<T> implements InvocationHandler {
             applyClass = serverNameAnnotation.applyClass();
         }
         EurekaClient eurekaClient = (EurekaClient) SpringIocUtil.getBean("eurekaClient");
-        FallbackFactory<T> fallbackFactory = cause -> {
-            Result result = new Result(ERROR_CLOUD);
-            return (T) result;
-        };
-        HystrixFeign.Builder builder =
-                HystrixFeign.builder().errorDecoder((String methodKey, Response response) -> feign.FeignException.errorStatus(methodKey, response))
-                        .options(new Request.Options(200, 2000))
-                        .retryer(Retryer.NEVER_RETRY);
-
+        Feign.Builder builder;
         ReturnDecoder returnDecoder = method.getAnnotation(ReturnDecoder.class);
         if (returnDecoder != null) {
-            builder.encoder(new FormEncoder()).decoder((Decoder) SpringIocUtil.getBean(returnDecoder.value()));
+            builder = Feign.builder().encoder(new FormEncoder()).decoder((Decoder) SpringIocUtil.getBean(returnDecoder.value()));
         } else if (method.getReturnType().isAssignableFrom(Result.class)) {
-            builder.encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
         } else if (!method.getReturnType().isAssignableFrom(String.class)) {
-            builder.encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
+            builder = Feign.builder().encoder(new FormEncoder()).decoder(SpringIocUtil.getBean(FastJsonDecoder.class));
         } else {
-            builder.encoder(new FormEncoder());
+            builder = Feign.builder().encoder(new FormEncoder());
         }
         if (RequestInterceptor.class.isAssignableFrom(applyClass)) {
             try {
@@ -107,7 +99,7 @@ public class CloudProxy<T> implements InvocationHandler {
             }
         }
         builder.contract(new PostElectiveContract());
-        Object service = builder.target((Class<T>) method.getDeclaringClass(), instanceCur.getHomePageUrl(), fallbackFactory);
+        Object service = builder.target(method.getDeclaringClass(), instanceCur.getHomePageUrl());
         return method.invoke(service, args);
 
     }

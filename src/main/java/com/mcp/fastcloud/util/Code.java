@@ -7,7 +7,7 @@ public interface Code {
 
     int getCode();
 
-    String getMsg();
+    String getMessage();
 
 
 }
